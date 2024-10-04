@@ -465,17 +465,19 @@ func main() {
 
 		currentFile = fd
 
-		var buf bytes.Buffer
-		if err := tmpl.Execute(&buf, fd); err != nil {
-			log.Fatal(err)
+		if len(fd.Service) > 0 {
+			var buf bytes.Buffer
+			if err := tmpl.Execute(&buf, fd); err != nil {
+				log.Fatal(err)
+			}
+
+			currentFile = nil
+
+			response.File = append(response.File, &plugin.CodeGeneratorResponse_File{
+				Name:    proto.String(goFileName(fd)),
+				Content: proto.String(buf.String()),
+			})
 		}
-
-		currentFile = nil
-
-		response.File = append(response.File, &plugin.CodeGeneratorResponse_File{
-			Name:    proto.String(goFileName(fd)),
-			Content: proto.String(buf.String()),
-		})
 	}
 
 	if data, err = proto.Marshal(&response); err != nil {
